@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Wavelength — Party Game</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F1E7D6;
+    --card: #FBF6EC;
+    --card-border: #E6D8BE;
+    --ink: #2B2420;
+    --muted: #8B7E6C;
+    --accent: #C1502E;
+    --accent-dark: #A5411F;
+    --accent-soft: #F0D9CB;
+    --green: #4C8F63;
+    --green-light: #8FC29B;
+    --yellow: #E0B84A;
+    --orange: #DE8A45;
+    --line: #E6D8BE;
+    --radius-lg: 26px;
+    --radius-md: 18px;
+  }
+  *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    background: var(--bg);
+    background-image: radial-gradient(circle at 10% 0%, #F6EEDF 0%, var(--bg) 55%);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding: 20px 16px 40px;
+  }
+  h1,h2,h3{ font-family:'Fredoka', system-ui, sans-serif; margin:0; font-weight:600; }
+  .wrap{ width:100%; max-width: 460px; }
+  .brand{ display:flex; align-items:center; gap:10px; margin-bottom:22px; justify-content:center; }
+  .brand .dot{ width:14px; height:14px; border-radius:50%; background: var(--accent); }
+  .brand h1{ font-size: 26px; color: var(--ink); letter-spacing: -0.02em; }
+  .card{
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 22px 20px;
+    margin-bottom: 16px;
+  }
+  .card + .card{ margin-top: 0; }
+  label{ display:block; font-size: 13px; color: var(--muted); margin: 14px 0 6px; font-weight:600; }
+  label:first-of-type{ margin-top:0; }
+  input[type=text], input[type=number]{
+    width:100%; padding: 14px 16px; border-radius: var(--radius-md);
+    border: 1.5px solid var(--card-border); background: #fff;
+    font-family: inherit; font-size: 16px; color: var(--ink); outline:none;
+  }
+  input[type=text]:focus, input[type=number]:focus{ border-color: var(--accent); }
+  .btn{
+    display:block; width:100%; text-align:center; padding: 15px 18px;
+    border-radius: var(--radius-md); border: none; font-family:'Fredoka', sans-serif;
+    font-size: 17px; font-weight:600; cursor:pointer; margin-top: 14px;
+    background: var(--accent); color: #fff; letter-spacing: -0.01em;
+  }
+  .btn:active{ background: var(--accent-dark); }
+  .btn:disabled{ opacity:.45; }
+  .btn.secondary{ background: transparent; color: var(--accent); border: 1.5px solid var(--accent); }
+  .btn.ghost{ background: transparent; color: var(--muted); border: 1.5px solid var(--card-border); }
+  .btn.small{ padding: 10px 14px; font-size: 14px; margin-top:0; width:auto; }
+  .row{ display:flex; gap:10px; }
+  .row .btn{ flex:1; }
+  .tabbar{ display:flex; gap:8px; margin-bottom: 16px; }
+  .tabbar button{
+    flex:1; padding: 11px; border-radius: 14px; border: 1.5px solid var(--card-border);
+    background: var(--card); font-family:'Fredoka',sans-serif; font-weight:600; font-size:14px;
+    color: var(--muted); cursor:pointer;
+  }
+  .tabbar button.active{ background: var(--accent); color:#fff; border-color: var(--accent); }
+  .hint{ font-size: 12.5px; color: var(--muted); margin-top: 10px; text-align:center; line-height:1.5; }
+  .code-badge{
+    font-family:'Fredoka',sans-serif; font-size: 34px; letter-spacing: 6px; text-align:center;
+    color: var(--accent); font-weight:700; padding: 14px 0 4px;
+  }
+  .players-list{ display:flex; flex-direction:column; gap:8px; margin-top:6px; }
+  .player-pill{
+    display:flex; align-items:center; justify-content:space-between;
+    background:#fff; border:1px solid var(--card-border); border-radius: 14px; padding: 10px 14px;
+    font-size: 14.5px; font-weight:600;
+  }
+  .player-pill .badge{
+    font-size:11px; font-weight:700; padding: 3px 9px; border-radius: 20px; color:#fff;
+  }
+  .badge.teamA{ background: var(--accent); }
+  .badge.teamB{ background: var(--green); }
+  .badge.host{ background: var(--muted); }
+  .badge.you{ background: var(--yellow); color: var(--ink); }
+  .team-columns{ display:flex; gap:12px; margin-top:10px; }
+  .team-col{ flex:1; }
+  .team-col h3{ font-size:14px; margin-bottom:8px; }
+  .team-col.a h3{ color: var(--accent); }
+  .team-col.b h3{ color: var(--green); }
+  .center-msg{ text-align:center; color: var(--muted); font-size: 14px; padding: 6px 0; }
+
+  .scoreboard{ display:flex; gap:10px; margin-bottom:14px; }
+  .score-card{
+    flex:1; background:var(--card); border:1px solid var(--card-border); border-radius: var(--radius-md);
+    padding: 12px 14px; text-align:center;
+  }
+  .score-card.active{ border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft) inset; }
+  .score-card .label{ font-size:12px; color:var(--muted); font-weight:600; }
+  .score-card .num{ font-family:'Fredoka',sans-serif; font-size: 28px; font-weight:700; margin-top:2px; }
+  .score-card.a .num{ color: var(--accent); }
+  .score-card.b .num{ color: var(--green); }
+
+  .round-tag{ text-align:center; font-size:12.5px; color:var(--muted); font-weight:600; margin-bottom:10px; letter-spacing:.02em; }
+  .spectrum-heading{ text-align:center; margin: 4px 0 18px; }
+  .spectrum-heading .words{ font-family:'Fredoka',sans-serif; font-size: 21px; font-weight:600; }
+  .spectrum-heading .words .lo{ color: var(--accent); }
+  .spectrum-heading .words .hi{ color: var(--green); }
+  .spectrum-heading .words .sep{ color: var(--muted); font-weight:500; margin: 0 6px; }
+  .role-tag{
+    display:inline-block; margin: 0 auto 14px; padding: 6px 14px; border-radius: 20px;
+    background: var(--accent-soft); color: var(--accent-dark); font-weight:700; font-size:12.5px;
+    text-align:center;
+  }
+  .role-wrap{ text-align:center; }
+
+  .dial-wrap{ position:relative; width:100%; max-width: 360px; margin: 0 auto; touch-action:none; }
+  .dial-value{
+    position:absolute; top: 4px; left:50%; transform:translateX(-50%);
+    font-family:'Fredoka',sans-serif; font-size:13px; color:var(--muted); font-weight:600;
+  }
+
+  textarea, .clue-input{
+    width:100%; padding: 14px 16px; border-radius: var(--radius-md);
+    border: 1.5px solid var(--card-border); background: #fff; font-family: inherit;
+    font-size: 16px; resize:none; outline:none;
+  }
+  .clue-input:focus{ border-color:var(--accent); }
+  .clue-shown{
+    background: #fff; border:1.5px dashed var(--card-border); border-radius: var(--radius-md);
+    padding: 16px; text-align:center; font-size: 18px; font-weight:600; margin-top: 10px;
+  }
+  .waiting-dots{ text-align:center; color:var(--muted); font-size: 14px; margin-top:10px; }
+
+  .reveal-points{ text-align:center; margin: 10px 0 4px; }
+  .reveal-points .big{ font-family:'Fredoka',sans-serif; font-size: 44px; font-weight:700; color: var(--accent); }
+  .reveal-points .small{ font-size:13px; color:var(--muted); font-weight:600; }
+
+  .footer-note{ text-align:center; font-size:11.5px; color: var(--muted); margin-top: 18px; opacity:.8; }
+
+  .error-toast{
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+    background: var(--ink); color:#fff; padding: 12px 18px; border-radius: 14px;
+    font-size: 13.5px; max-width: 90vw; text-align:center; z-index: 50; box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  }
+  .winner-banner{
+    text-align:center; padding: 26px 10px 6px;
+  }
+  .winner-banner .trophy{ font-size: 46px; }
+  .winner-banner h2{ font-size: 26px; margin-top: 8px; }
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="brand"><span class="dot"></span><h1>Wavelength</h1></div>
+
+  <!-- HOME -->
+  <div id="screen-home">
+    <div class="tabbar">
+      <button id="tab-create" class="active">Create room</button>
+      <button id="tab-join">Join room</button>
+    </div>
+
+    <div id="pane-create" class="card">
+      <label>Your name</label>
+      <input type="text" id="create-name" maxlength="18" placeholder="e.g. Sam">
+      <label>Rounds</label>
+      <input type="number" id="create-rounds" value="8" min="4" max="20">
+      <button class="btn" id="btn-create">Create room</button>
+      <p class="hint">You'll get a room code to share with friends.</p>
+    </div>
+
+    <div id="pane-join" class="card hidden">
+      <label>Your name</label>
+      <input type="text" id="join-name" maxlength="18" placeholder="e.g. Sam">
+      <label>Room code</label>
+      <input type="text" id="join-code" maxlength="6" placeholder="e.g. FOXY" style="text-transform:uppercase; letter-spacing:3px;">
+      <button class="btn" id="btn-join">Join room</button>
+    </div>
+  </div>
+
+  <!-- LOBBY -->
+  <div id="screen-lobby" class="hidden">
+    <div class="card">
+      <div class="center-msg">Room code</div>
+      <div class="code-badge" id="lobby-code">----</div>
+      <div class="hint">Share this code — everyone joins from the home screen.</div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:4px;">Players</h3>
+      <div id="lobby-unassigned" class="players-list"></div>
+      <div class="team-columns" id="lobby-teams-wrap">
+        <div class="team-col a">
+          <h3>Team A</h3>
+          <div id="lobby-teamA" class="players-list"></div>
+        </div>
+        <div class="team-col b">
+          <h3>Team B</h3>
+          <div id="lobby-teamB" class="players-list"></div>
+        </div>
+      </div>
+      <button class="btn secondary" id="btn-shuffle-teams">Shuffle teams</button>
+      <button class="btn" id="btn-start-game">Start game</button>
+      <p class="hint" id="lobby-host-hint">Waiting for host to start the game…</p>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div id="screen-game" class="hidden">
+    <div class="scoreboard">
+      <div class="score-card a" id="score-a-card">
+        <div class="label">Team A</div>
+        <div class="num" id="score-a">0</div>
+      </div>
+      <div class="score-card b" id="score-b-card">
+        <div class="label">Team B</div>
+        <div class="num" id="score-b">0</div>
+      </div>
+    </div>
+    <div class="round-tag" id="round-tag">Round 1</div>
+
+    <div class="card">
+      <div class="role-wrap">
+        <span class="role-tag" id="role-tag">Watching</span>
+      </div>
+      <div class="spectrum-heading">
+        <div class="words"><span class="lo" id="spec-left">Left</span><span class="sep">↔</span><span class="hi" id="spec-right">Right</span></div>
+      </div>
+
+      <div class="dial-wrap">
+        <div class="dial-value" id="dial-value-label"></div>
+        <svg id="dial-svg" viewBox="0 0 300 175" style="width:100%; display:block;"></svg>
+      </div>
+
+      <div id="phase-clue-psychic" class="hidden">
+        <label>Give your team a one-word (or short) clue</label>
+        <input type="text" class="clue-input" id="clue-input" maxlength="60" placeholder="Type your clue…">
+        <button class="btn" id="btn-submit-clue">Lock in clue</button>
+      </div>
+
+      <div id="phase-clue-waiting" class="hidden">
+        <p class="waiting-dots" id="clue-waiting-text">Waiting for the psychic to give a clue…</p>
+      </div>
+
+      <div id="phase-guess-active" class="hidden">
+        <div class="clue-shown" id="clue-shown-text"></div>
+        <p class="hint">Drag the dial to where you think the target is, then lock it in.</p>
+        <button class="btn" id="btn-submit-guess">Lock in guess</button>
+      </div>
+
+      <div id="phase-guess-psychic" class="hidden">
+        <div class="clue-shown" id="clue-shown-text2"></div>
+        <p class="waiting-dots">Your team is guessing…</p>
+      </div>
+
+      <div id="phase-guess-otherteam" class="hidden">
+        <p class="waiting-dots">The other team is guessing this round. Sit tight.</p>
+      </div>
+
+      <div id="phase-reveal" class="hidden">
+        <div class="reveal-points">
+          <div class="big" id="reveal-points-num">+0</div>
+          <div class="small" id="reveal-points-label">points this round</div>
+        </div>
+        <button class="btn" id="btn-next-round">Next round</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- END -->
+  <div id="screen-end" class="hidden">
+    <div class="card winner-banner">
+      <div class="trophy">🏆</div>
+      <h2 id="winner-text">Team A wins!</h2>
+      <div class="scoreboard" style="margin-top:16px;">
+        <div class="score-card a"><div class="label">Team A</div><div class="num" id="end-score-a">0</div></div>
+        <div class="score-card b"><div class="label">Team B</div><div class="num" id="end-score-b">0</div></div>
+      </div>
+      <button class="btn" id="btn-play-again">Back to home</button>
+    </div>
+  </div>
+
+  <p class="footer-note">Wavelength-style party game · built on Cloudflare Pages</p>
+</div>
+
+<div id="toast" class="error-toast hidden"></div>
+
+<script>
+/* ---------- state ---------- */
+const LS_KEY = 'wavelength_player';
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch(e){}
+
+let playerId = saved.playerId || null;
+let roomCode = saved.roomCode || null;
+let playerName = saved.name || '';
+
+let pollTimer = null;
+let lastPhase = null;
+let dragging = false;
+let localGuessValue = 50;
+let currentState = null;
+
+function persist(){
+  localStorage.setItem(LS_KEY, JSON.stringify({ playerId, roomCode, name: playerName }));
+}
+function clearPersist(){
+  playerId = null; roomCode = null;
+  localStorage.removeItem(LS_KEY);
+}
+
+/* ---------- helpers ---------- */
+function $(id){ return document.getElementById(id); }
+function show(id){ $(id).classList.remove('hidden'); }
+function hide(id){ $(id).classList.add('hidden'); }
+function showOnly(...ids){
+  ['phase-clue-psychic','phase-clue-waiting','phase-guess-active','phase-guess-psychic','phase-guess-otherteam','phase-reveal']
+    .forEach(x => hide(x));
+  ids.forEach(x => show(x));
+}
+let toastTimer = null;
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.add('hidden'), 2600);
+}
+
+async function api(action, payload){
+  const res = await fetch('/api/room', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, ...payload })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.error) {
+    throw new Error(data.error || 'Something went wrong');
+  }
+  return data;
+}
+
+/* ---------- dial rendering ---------- */
+const CX = 150, CY = 160, R = 128, TRACK_W = 26;
+function valueToAngle(v){ return Math.PI - (Math.max(0,Math.min(100,v))/100)*Math.PI; }
+function pt(v, r){
+  const a = valueToAngle(v);
+  return { x: CX + r*Math.cos(a), y: CY - r*Math.sin(a) };
+}
+function arcPath(v1, v2, r){
+  v1 = Math.max(0, Math.min(100, v1));
+  v2 = Math.max(0, Math.min(100, v2));
+  if (v1 >= v2) return '';
+  const p1 = pt(v1, r), p2 = pt(v2, r);
+  const large = (v2 - v1) > 50 ? 1 : 0;
+  return `M ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} A ${r} ${r} 0 ${large} 1 ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+}
+function svgEl(tag, attrs){
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+
+function renderDial({ target, guess, mode }){
+  // mode: 'idle' | 'drag' (guesser dragging, no target shown) | 'psychic' (target shown, faint) | 'reveal' (bands + needle for guess + target)
+  const svg = $('dial-svg');
+  svg.innerHTML = '';
+
+  // base track
+  const track = svgEl('path', {
+    d: arcPath(0, 100, R),
+    fill: 'none', stroke: '#E9DCC4', 'stroke-width': TRACK_W, 'stroke-linecap': 'round'
+  });
+  svg.appendChild(track);
+
+  if (mode === 'reveal' && typeof target === 'number') {
+    const bands = [
+      { w: 25, color: '#F1D8B8' },
+      { w: 15, color: '#EAC07E' },
+      { w: 8,  color: '#9ED0A8' },
+      { w: 3,  color: '#4C8F63' },
+    ];
+    bands.forEach(b => {
+      const p = svgEl('path', {
+        d: arcPath(target - b.w, target + b.w, R),
+        fill: 'none', stroke: b.color, 'stroke-width': TRACK_W, 'stroke-linecap': 'round'
+      });
+      svg.appendChild(p);
+    });
+  } else if (mode === 'psychic' && typeof target === 'number') {
+    const marker = pt(target, R);
+    svg.appendChild(svgEl('circle', { cx: marker.x, cy: marker.y, r: 11, fill: 'none', stroke: '#C1502E', 'stroke-width': 4 }));
+  }
+
+  // tick marks at 0/50/100
+  [0,50,100].forEach(v => {
+    const inner = pt(v, R - TRACK_W/2 - 6);
+    const outer = pt(v, R + TRACK_W/2 + 6);
+    svg.appendChild(svgEl('line', { x1: inner.x, y1: inner.y, x2: outer.x, y2: outer.y, stroke:'#D8C7A6', 'stroke-width': 2 }));
+  });
+
+  // needle(s)
+  if (typeof guess === 'number') {
+    const tip = pt(guess, R);
+    svg.appendChild(svgEl('line', { x1: CX, y1: CY, x2: tip.x, y2: tip.y, stroke: '#2B2420', 'stroke-width': 3, 'stroke-linecap':'round' }));
+    svg.appendChild(svgEl('circle', { cx: tip.x, cy: tip.y, r: 9, fill: '#C1502E', stroke:'#fff', 'stroke-width': 3 }));
+  }
+  if (mode === 'reveal' && typeof target === 'number') {
+    const tip = pt(target, R);
+    svg.appendChild(svgEl('circle', { cx: tip.x, cy: tip.y, r: 6, fill: '#2B2420' }));
+  }
+
+  svg.appendChild(svgEl('circle', { cx: CX, cy: CY, r: 6, fill: '#2B2420' }));
+}
+
+function dialValueFromPointer(clientX, clientY){
+  const svg = $('dial-svg');
+  const rect = svg.getBoundingClientRect();
+  const scale = 300 / rect.width;
+  const x = (clientX - rect.left) * scale;
+  const y = (clientY - rect.top) * scale;
+  let angle = Math.atan2(CY - y, x - CX);
+  if (angle < 0) angle = 0;
+  if (angle > Math.PI) angle = Math.PI;
+  const v = 100 * (1 - angle / Math.PI);
+  return Math.round(Math.max(0, Math.min(100, v)));
+}
+
+function attachDialDrag(){
+  const svg = $('dial-svg');
+  function start(e){
+    if (!canDrag()) return;
+    dragging = true;
+    move(e);
+    e.preventDefault();
+  }
+  function move(e){
+    if (!dragging) return;
+    const point = e.touches ? e.touches[0] : e;
+    localGuessValue = dialValueFromPointer(point.clientX, point.clientY);
+    renderDial({ guess: localGuessValue, mode: 'drag' });
+    $('dial-value-label').textContent = String(localGuessValue);
+  }
+  function end(){ dragging = false; }
+  svg.addEventListener('mousedown', start);
+  window.addEventListener('mousemove', move);
+  window.addEventListener('mouseup', end);
+  svg.addEventListener('touchstart', start, { passive: false });
+  window.addEventListener('touchmove', move, { passive: false });
+  window.addEventListener('touchend', end);
+}
+function canDrag(){
+  if (!currentState) return false;
+  const { phase, activeTeam, psychicId } = currentState;
+  if (phase !== 'guess') return false;
+  const myTeam = teamOf(playerId);
+  return myTeam === activeTeam && playerId !== psychicId;
+}
+function teamOf(id){
+  if (!currentState) return null;
+  if (currentState.teamA.includes(id)) return 'A';
+  if (currentState.teamB.includes(id)) return 'B';
+  return null;
+}
+
+/* ---------- home screen ---------- */
+$('tab-create').onclick = () => {
+  $('tab-create').classList.add('active'); $('tab-join').classList.remove('active');
+  show('pane-create'); hide('pane-join');
+};
+$('tab-join').onclick = () => {
+  $('tab-join').classList.add('active'); $('tab-create').classList.remove('active');
+  show('pane-join'); hide('pane-create');
+};
+
+$('btn-create').onclick = async () => {
+  const name = $('create-name').value.trim();
+  const rounds = parseInt($('create-rounds').value, 10) || 8;
+  if (!name) return toast('Enter your name first');
+  try {
+    const data = await api('create', { name, totalRounds: rounds });
+    playerId = data.playerId; roomCode = data.code; playerName = name;
+    persist();
+    enterLobby();
+  } catch (e) { toast(e.message); }
+};
+
+$('btn-join').onclick = async () => {
+  const name = $('join-name').value.trim();
+  const code = $('join-code').value.trim().toUpperCase();
+  if (!name || !code) return toast('Enter your name and the room code');
+  try {
+    const data = await api('join', { name, code });
+    playerId = data.playerId; roomCode = code; playerName = name;
+    persist();
+    enterLobby();
+  } catch (e) { toast(e.message); }
+};
+
+/* ---------- lobby ---------- */
+function enterLobby(){
+  hide('screen-home'); hide('screen-end'); hide('screen-game');
+  show('screen-lobby');
+  $('lobby-code').textContent = roomCode;
+  startPolling();
+}
+
+$('btn-shuffle-teams').onclick = async () => {
+  try { await api('assignTeams', { code: roomCode, playerId }); } catch (e) { toast(e.message); }
+};
+$('btn-start-game').onclick = async () => {
+  try { await api('start', { code: roomCode, playerId }); } catch (e) { toast(e.message); }
+};
+
+function renderLobby(state){
+  const unassigned = state.players.filter(p => !state.teamA.includes(p.id) && !state.teamB.includes(p.id));
+  const rowsFor = (list) => list.map(id => {
+    const p = state.players.find(pp => pp.id === id);
+    if (!p) return '';
+    const tags = [];
+    if (id === state.hostId) tags.push('<span class="badge host">Host</span>');
+    if (id === playerId) tags.push('<span class="badge you">You</span>');
+    return `<div class="player-pill"><span>${escapeHtml(p.name)}</span><span>${tags.join(' ')}</span></div>`;
+  }).join('');
+
+  $('lobby-unassigned').innerHTML = unassigned.length
+    ? rowsFor(unassigned.map(p => p.id))
+    : '';
+  $('lobby-teamA').innerHTML = rowsFor(state.teamA) || '<p class="hint" style="margin:0;">Empty</p>';
+  $('lobby-teamB').innerHTML = rowsFor(state.teamB) || '<p class="hint" style="margin:0;">Empty</p>';
+
+  const isHost = state.hostId === playerId;
+  $('btn-shuffle-teams').classList.toggle('hidden', !isHost);
+  $('btn-start-game').classList.toggle('hidden', !isHost);
+  $('lobby-host-hint').classList.toggle('hidden', isHost);
+  $('btn-start-game').disabled = state.teamA.length < 1 || state.teamB.length < 1;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------- game screen ---------- */
+function enterGame(){
+  hide('screen-home'); hide('screen-lobby'); hide('screen-end');
+  show('screen-game');
+  attachDialDrag();
+}
+
+function renderGame(state){
+  $('score-a').textContent = state.scoreA;
+  $('score-b').textContent = state.scoreB;
+  $('score-a-card').classList.toggle('active', state.activeTeam === 'A');
+  $('score-b-card').classList.toggle('active', state.activeTeam === 'B');
+  $('round-tag').textContent = `Round ${state.round} of ${state.totalRounds}`;
+  $('spec-left').textContent = state.spectrumLeft;
+  $('spec-right').textContent = state.spectrumRight;
+
+  const myTeam = teamOf(playerId);
+  const isPsychic = playerId === state.psychicId;
+  const psychicName = (state.players.find(p => p.id === state.psychicId) || {}).name || '…';
+
+  if (isPsychic) $('role-tag').textContent = 'You are the psychic';
+  else if (myTeam === state.activeTeam) $('role-tag').textContent = `Guessing — psychic is ${psychicName}`;
+  else $('role-tag').textContent = `Watching — psychic is ${psychicName}`;
+
+  if (state.phase === 'clue') {
+    if (isPsychic) {
+      renderDial({ target: state.target, mode: 'psychic' });
+      $('dial-value-label').textContent = '';
+      showOnly('phase-clue-psychic');
+      if (document.activeElement !== $('clue-input')) $('clue-input').value = '';
+    } else {
+      renderDial({ mode: 'idle' });
+      $('dial-value-label').textContent = '';
+      showOnly('phase-clue-waiting');
+      $('clue-waiting-text').textContent = myTeam === state.activeTeam
+        ? `Waiting for ${psychicName} to give a clue…`
+        : `${psychicName}'s team is thinking of a clue…`;
+    }
+  } else if (state.phase === 'guess') {
+    if (isPsychic) {
+      renderDial({ target: state.target, mode: 'psychic' });
+      $('dial-value-label').textContent = '';
+      $('clue-shown-text2').textContent = `“${state.clue}”`;
+      showOnly('phase-guess-psychic');
+    } else if (myTeam === state.activeTeam) {
+      if (!dragging) {
+        renderDial({ guess: localGuessValue, mode: 'drag' });
+        $('dial-value-label').textContent = String(localGuessValue);
+      }
+      $('clue-shown-text').textContent = `“${state.clue}”`;
+      showOnly('phase-guess-active');
+    } else {
+      renderDial({ mode: 'idle' });
+      $('dial-value-label').textContent = '';
+      showOnly('phase-guess-otherteam');
+    }
+  } else if (state.phase === 'reveal') {
+    renderDial({ target: state.target, guess: state.guess, mode: 'reveal' });
+    $('dial-value-label').textContent = '';
+    $('reveal-points-num').textContent = `+${state.lastPoints}`;
+    $('reveal-points-label').textContent = `points for Team ${state.activeTeam} this round`;
+    showOnly('phase-reveal');
+  }
+
+  if (state.phase !== lastPhase) {
+    lastPhase = state.phase;
+    if (state.phase === 'clue') localGuessValue = 50;
+  }
+}
+
+$('btn-submit-clue').onclick = async () => {
+  const clue = $('clue-input').value.trim();
+  if (!clue) return toast('Type a clue first');
+  try { await api('submitClue', { code: roomCode, playerId, clue }); }
+  catch (e) { toast(e.message); }
+};
+$('btn-submit-guess').onclick = async () => {
+  try { await api('submitGuess', { code: roomCode, playerId, guess: localGuessValue }); }
+  catch (e) { toast(e.message); }
+};
+$('btn-next-round').onclick = async () => {
+  try { await api('nextRound', { code: roomCode, playerId }); }
+  catch (e) { toast(e.message); }
+};
+
+/* ---------- end screen ---------- */
+function enterEnd(state){
+  hide('screen-home'); hide('screen-lobby'); hide('screen-game');
+  show('screen-end');
+  $('end-score-a').textContent = state.scoreA;
+  $('end-score-b').textContent = state.scoreB;
+  const winner = state.scoreA === state.scoreB ? 'It’s a tie!' :
+    (state.scoreA > state.scoreB ? 'Team A wins!' : 'Team B wins!');
+  $('winner-text').textContent = winner;
+}
+$('btn-play-again').onclick = () => {
+  clearPersist();
+  stopPolling();
+  hide('screen-end');
+  show('screen-home');
+};
+
+/* ---------- polling ---------- */
+function startPolling(){
+  stopPolling();
+  poll();
+  pollTimer = setInterval(poll, 1400);
+}
+function stopPolling(){
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = null;
+}
+async function poll(){
+  if (!roomCode || !playerId) return;
+  try {
+    const res = await fetch(`/api/room?code=${encodeURIComponent(roomCode)}&playerId=${encodeURIComponent(playerId)}`);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || 'Room not found');
+    }
+    const state = await res.json();
+    currentState = state;
+    if (!state.started) {
+      if ($('screen-lobby').classList.contains('hidden')) enterLobby();
+      renderLobby(state);
+    } else if (state.phase === 'end') {
+      enterEnd(state);
+    } else {
+      if ($('screen-game').classList.contains('hidden')) enterGame();
+      renderGame(state);
+    }
+  } catch (e) {
+    toast(e.message);
+    stopPolling();
+    clearPersist();
+    hide('screen-lobby'); hide('screen-game'); hide('screen-end');
+    show('screen-home');
+  }
+}
+
+/* ---------- resume session ---------- */
+if (playerId && roomCode) {
+  enterLobby();
+}
+</script>
+</body>
+</html>
