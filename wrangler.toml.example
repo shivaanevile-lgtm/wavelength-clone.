@@ -1,0 +1,8 @@
+name = "wavelength-clone"
+compatibility_date = "2024-09-01"
+pages_build_output_dir = "public"
+
+[[kv_namespaces]]
+binding = "ROOMS"
+id = "e8a8ebea27b143e5965e18d34bbd7a6b"
+preview_id = "e8a8ebea27b143e5965e18d34bbd7a6b"
